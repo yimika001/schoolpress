@@ -1,0 +1,25 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependencies (restored via composer install / npm install)
+/**/vendor/
+/**/node_modules/
+
+# Build output
+/**/dist/
+/**/build/
+
+# Local WordPress dev environments
+.wp-env.override.json
+wp-config-local.php
+*.sql
+
+# Environment/secrets
+.env
+.env.*
+
+# Logs
+*.log
