@@ -7,18 +7,15 @@
 
 namespace SchoolPress\Results;
 
+use SchoolPress\Results\Database\Migrator;
+use SchoolPress\Results\Support\Logger;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
  * Runs on plugin activation.
- *
- * Deliberately does NOT create any custom database tables or seed any
- * data yet — the academic/result schema has not been approved. This
- * only records the installed version so a future migration routine
- * (Milestone 2+) can compare "installed version" against "code version"
- * and know whether a migration is needed.
  */
 class Activator {
 
@@ -37,6 +34,25 @@ class Activator {
 		// future migrations can run only when the DB actually needs it.
 		if ( false === get_option( 'spsr_db_version' ) ) {
 			add_option( 'spsr_db_version', '0' );
+		}
+
+		$migration_result = Migrator::migrate();
+
+		if ( is_wp_error( $migration_result ) ) {
+			Logger::error(
+				'SchoolPress Results database migration failed during activation.',
+				array(
+					'error' => $migration_result->get_error_message(),
+				)
+			);
+
+			deactivate_plugins( SPSR_PLUGIN_BASENAME );
+
+			wp_die(
+				esc_html__( 'SchoolPress Results could not be activated because the database migration failed.', 'schoolpress-results' ),
+				esc_html__( 'Plugin Activation Error', 'schoolpress-results' ),
+				array( 'back_link' => true )
+			);
 		}
 
 		flush_rewrite_rules();
